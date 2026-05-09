@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kane Carver — Veil — Weapon Wheel</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f4f3f0;
+    --bg-tertiary: #eceae4;
+    --text-primary: #1a1a18;
+    --text-secondary: #5a5a56;
+    --text-tertiary: #999893;
+    --border-tertiary: rgba(0,0,0,0.12);
+    --border-secondary: rgba(0,0,0,0.22);
+    --border-primary: rgba(0,0,0,0.35);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1e1e1c;
+      --bg-secondary: #272724;
+      --bg-tertiary: #2f2f2c;
+      --text-primary: #f0ede6;
+      --text-secondary: #a8a59e;
+      --text-tertiary: #6e6d68;
+      --border-tertiary: rgba(255,255,255,0.10);
+      --border-secondary: rgba(255,255,255,0.18);
+      --border-primary: rgba(255,255,255,0.28);
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+  }
+
+  .header-name {
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 0.03em;
+  }
+
+  .header-title {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+
+  .main-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .wheel-wrapper {
+    position: relative;
+    width: 370px;
+    height: 370px;
+    flex-shrink: 0;
+  }
+
+  .wheel-svg { width: 100%; height: 100%; }
+
+  .center-display {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 124px; height: 124px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    transition: all 0.2s;
+  }
+
+  .center-icon { font-size: 22px; margin-bottom: 4px; color: var(--text-primary); }
+  .center-name { font-size: 9px; font-weight: 500; color: var(--text-primary); letter-spacing: 0.07em; text-transform: uppercase; line-height: 1.3; }
+  .center-sub { font-size: 8px; color: var(--text-tertiary); margin-top: 2px; }
+
+  .right-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 6px;
+    width: 148px;
+  }
+
+  .col-label {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+  }
+
+  .utility-card, .mass-card {
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-tertiary);
+    border-radius: var(--radius-md);
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .utility-card:hover, .mass-card:hover {
+    border-color: var(--border-secondary);
+    background: var(--bg-secondary);
+  }
+
+  .utility-card.active, .mass-card.active {
+    border-color: var(--border-primary);
+    background: var(--bg-secondary);
+  }
+
+  .util-top, .mass-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .util-icon, .mass-icon { font-size: 14px; }
+  .util-name, .mass-name {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .mass-badge {
+    font-size: 8px;
+    padding: 2px 6px;
+    border-radius: 99px;
+    margin-left: auto;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .util-input, .mass-input {
+    font-size: 9px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.02em;
+  }
+
+  .mass-section { margin-top: 2px; }
+  .mass-card { margin-bottom: 6px; }
+  .mass-card:last-child { margin-bottom: 0; }
+
+  .info-panel {
+    width: 100%;
+    max-width: 538px;
+    margin-top: 1.25rem;
+    background: var(--bg-primary);
+    border: 0.5px solid var(--border-tertiary);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    min-height: 165px;
+  }
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--border-tertiary);
+    flex-wrap: wrap;
+  }
+
+  .info-badge {
+    font-size: 9px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: var(--radius-md);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .info-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .input-chip {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .btn-chip {
+    font-size: 9px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border-tertiary);
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .info-desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    line-height: 1.68;
+    margin-bottom: 10px;
+  }
+
+  .info-stats { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .stat-pill {
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 0.5px solid var(--border-tertiary);
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+  }
+
+  .slice-path { cursor: pointer; transition: opacity 0.15s; }
+  .slice-path:hover { opacity: 0.88; }
+  .slice-path.active { opacity: 1; }
+  .slice-path:not(.active) { opacity: 0.45; }
+  .slice-label { pointer-events: none; }
+
+  .footer {
+    margin-top: 2rem;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="header-name">Kane Carver — Veil</div>
+    <div class="header-title">Ghost of NYZ &nbsp;·&nbsp; The Third Prototype</div>
+  </div>
+
+  <div class="main-row">
+    <div class="wheel-wrapper">
+      <svg class="wheel-svg" viewBox="0 0 370 370" xmlns="http://www.w3.org/2000/svg" id="wheelSvg"></svg>
+      <div class="center-display">
+        <div class="center-icon" id="centerIcon">◈</div>
+        <div class="center-name" id="centerName">Select</div>
+        <div class="center-sub" id="centerSub">a weapon</div>
+      </div>
+    </div>
+
+    <div class="right-col">
+      <div>
+        <div class="col-label">Utility</div>
+        <div class="utility-card" id="util-consume" onclick="selectUtility('consume')">
+          <div class="util-top">
+            <span class="util-icon">⊗</span>
+            <span class="util-name">Consume</span>
+          </div>
+          <div class="util-input">Hold △ near target</div>
+        </div>
+        <div style="height:6px"></div>
+        <div class="utility-card" id="util-shift" onclick="selectUtility('shift')">
+          <div class="util-top">
+            <span class="util-icon">⟳</span>
+            <span class="util-name">Shift</span>
+          </div>
+          <div class="util-input">× + L-stick direction</div>
+        </div>
+      </div>
+
+      <div class="mass-section">
+        <div class="col-label">Mass abilities</div>
+        <div class="mass-card" id="mass-dominion" onclick="selectMass('dominion')">
+          <div class="mass-top">
+            <span class="mass-icon" style="color:#7F77DD">◎</span>
+            <span class="mass-name">Dominion</span>
+            <span class="mass-badge" style="background:#EEEDFE;color:#534AB7">Resonance</span>
+          </div>
+          <div class="mass-input">L1 + R1 + △ (hold)</div>
+        </div>
+        <div class="mass-card" id="mass-emergence" onclick="selectMass('emergence')">
+          <div class="mass-top">
+            <span class="mass-icon" style="color:#1D9E75">⬡</span>
+            <span class="mass-name">Emergence</span>
+            <span class="mass-badge" style="background:#E1F5EE;color:#0F6E56">Summon</span>
+          </div>
+          <div class="mass-input">L1 + R1 + ○ (hold)</div>
+        </div>
+        <div class="mass-card" id="mass-salvo" onclick="selectMass('salvo')">
+          <div class="mass-top">
+            <span class="mass-icon" style="color:#D85A30">⊕</span>
+            <span class="mass-name">Salvo</span>
+            <span class="mass-badge" style="background:#FAECE7;color:#993C1D">Offensive</span>
+          </div>
+          <div class="mass-input">L1 + R1 + □</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div class="info-header">
+      <span class="info-badge" id="infoBadge" style="background:var(--bg-secondary);color:var(--text-secondary);">Weapon</span>
+      <span class="info-title" id="infoTitle">Select a weapon or ability</span>
+      <div class="input-chip" id="inputChip"></div>
+    </div>
+    <div class="info-desc" id="infoDesc">Click any segment on the wheel, a utility card, or a mass ability to view Kane Carver's full arsenal.</div>
+    <div class="info-stats" id="infoStats"></div>
+  </div>
+
+  <div class="footer">Prototype Universe OC &nbsp;·&nbsp; Kane Carver &nbsp;·&nbsp; Veil</div>
+</div>
+
+<script>
+const weapons = [
+  {
+    id: 0, name: "Fracture Arms", type: "Signature", icon: "⟁", color: "#378ADD",
+    badgeBg: "#E6F1FB", badgeColor: "#185FA5",
+    inputs: ["Hold L2 + R2", "R-stick aim"],
+    desc: "Twin biomass columns from the shoulder girdle, threaded with live Resonance current. Adaptive at every range — bludgeon at close quarters, frequency lance at mid, viral disruptor on direct contact. When they extend fully the light in them shifts cold. The fight is already decided.",
+    stats: ["Adaptive range", "Resonance-threaded", "Signature exclusive"]
+  },
+  {
+    id: 1, name: "Phalanx", type: "Close quarters", icon: "⌬", color: "#D85A30",
+    badgeBg: "#FAECE7", badgeColor: "#993C1D",
+    inputs: ["□ rapid", "L-stick + □"],
+    desc: "Four viral arms — two from the shoulders, two from the upper back — each ending in a dense biomass fist with three flush knuckle blades. Semi-independent: they follow Kane's intent but react to threats on their own. Six limbs never stop working at the same time.",
+    stats: ["Six limbs", "Semi-independent", "Knuckle blades"]
+  },
+  {
+    id: 2, name: "Caul", type: "Defense", icon: "⬡", color: "#7F77DD",
+    badgeBg: "#EEEDFE", badgeColor: "#534AB7",
+    inputs: ["L1 (hold)", "Auto-counter on hit"],
+    desc: "Biomass grown from the upper back, wrapping forward over one shoulder like a carapace. Irregular surface concealing spines that erupt outward toward whatever strikes it — precise, localized, automatic. The shield doesn't wait for permission.",
+    stats: ["Auto-counter spines", "Asymmetric coverage", "Worn not held"]
+  },
+  {
+    id: 3, name: "Graft", type: "Precision range", icon: "◎", color: "#1D9E75",
+    badgeBg: "#E1F5EE", badgeColor: "#0F6E56",
+    inputs: ["R2 (aim)", "R1 (fire)", "R1 rapid (spread)"],
+    desc: "The right palm splits and reforms into a loading cavity. Fires a dense tapered projectile that embeds on impact — barbed hooks locking it in place — then extends viral filaments into surrounding tissue. Against Evolved it dismantles the transformation sustaining their form. Slowly. Persistently.",
+    stats: ["Embeds on impact", "Persistent damage", "Spread mode"]
+  },
+  {
+    id: 4, name: "Stride", type: "Mobility", icon: "⟳", color: "#BA7517",
+    badgeBg: "#FAEEDA", badgeColor: "#854F0B",
+    inputs: ["L3 (activate)", "L-stick (direction)", "× (burst dash)"],
+    desc: "Digitigrade leg reformation — heel raised, weight perpetually forward. Covers a city block in seconds. Scales vertical surfaces without distinguishing up from forward. In combat the same mechanics become full repositioning before an incoming strike has finished arriving. He is still, then elsewhere.",
+    stats: ["City-scale traversal", "Vertical surfaces", "Combat repositioning"]
+  },
+  {
+    id: 5, name: "Trawl", type: "Control", icon: "⊗", color: "#888780",
+    badgeBg: "#F1EFE8", badgeColor: "#5F5E5A",
+    inputs: ["R2 + R1 (launch)", "R-stick up (pull)", "R-stick down (launch self)"],
+    desc: "The forearm opens and reforms into a launching mechanism. Fires a massive anchor of hardened biomass on a viral tether. Barbs deploy on impact, seating into whatever is beneath the target. Then Kane decides: pull them across the pavement toward him, or launch himself at them.",
+    stats: ["Anchor and tether", "Pull or launch", "Single target"]
+  },
+  {
+    id: 6, name: "Sunder", type: "Crowd", icon: "⚡", color: "#E24B4A",
+    badgeBg: "#FCEBEB", badgeColor: "#A32D2D",
+    inputs: ["L2 + R2 + ○", "Hold to widen radius"],
+    desc: "Both fists driven simultaneously into the ground. The viral matter travels outward beneath the surface as a radial pulse. Dense calcified spines erupt upward through fracture lines — unpredictable, fast, indiscriminate. Infected are thrown or impaled. Evolved contend with force from the wrong direction entirely.",
+    stats: ["Ground eruption", "Radial spines", "Full commitment"]
+  }
+];
+
+const utility = {
+  consume: {
+    name: "Consume", type: "Absorption", icon: "⊗",
+    badgeBg: "#F1EFE8", badgeColor: "#5F5E5A",
+    inputs: ["Hold △ near target"],
+    desc: "Kane's consumption includes a full Resonance read of the target — mapping viral signature, strain origin, and memory. He absorbs to survive. He absorbs to search. The face in the kitchen lives somewhere in accumulated memory. He keeps looking.",
+    stats: ["Viral mapping", "Memory absorption", "Biomass restoration"]
+  },
+  shift: {
+    name: "Shift", type: "Utility", icon: "⟳",
+    badgeBg: "#F1EFE8", badgeColor: "#5F5E5A",
+    inputs: ["× + L-stick direction"],
+    desc: "Rapid biomass redistribution for explosive directional movement. Resonance awareness extends during Shift — Kane perceives the full viral landscape mid-transit, reading threat positions before he lands. He rarely needs to move in the same direction twice.",
+    stats: ["Resonance navigation", "Explosive burst", "Precision landing"]
+  }
+};
+
+const mass = {
+  dominion: {
+    name: "Dominion", type: "Mass — Resonance", icon: "◎",
+    badgeBg: "#EEEDFE", badgeColor: "#534AB7",
+    inputs: ["L1 + R1 + △ (hold)"],
+    desc: "Kane stops. The Resonance current climbs past operational limits and establishes a zone forty meters in radius. Everything inside — viral, mechanical, structural — contends with a frequency that disagrees with its coherence. Kane moves freely within it. Everything else degrades. Ninety second maximum at full radius.",
+    stats: ["40m radius zone", "Affects all matter", "90s maximum", "High biomass drain"]
+  },
+  emergence: {
+    name: "Emergence", type: "Mass — Summon", icon: "⬡",
+    badgeBg: "#E1F5EE", badgeColor: "#0F6E56",
+    inputs: ["L1 + R1 + ○ (hold)"],
+    desc: "One hand flat against the ground. The Resonance travels downward rather than outward — a signal rather than a strike. Something in the deep receives it. The evolved Hydra beneath NYZ has been there since week three. Kane has never called it until the situation demands it. The ground opens. It comes up.",
+    stats: ["Evolved Hydra", "Independent action", "Dulls Resonance briefly", "Rare deployment"]
+  },
+  salvo: {
+    name: "Salvo", type: "Mass — Offensive", icon: "⊕",
+    badgeBg: "#FAECE7", badgeColor: "#993C1D",
+    inputs: ["L1 + R1 + □"],
+    desc: "A full spherical Resonance broadcast reads every viral signature in range simultaneously. Every surface of Kane's body produces and launches massive biomass projectiles — already locked to their targets before they leave his skin. Two seconds. Humans untouched. Everything viral addressed. Done.",
+    stats: ["Full body launch", "Resonance lock-on", "Viral targets only", "2 second window"]
+  }
+};
+
+const cx = 185, cy = 185;
+const outerR = 173, innerR = 65;
+const count = weapons.length;
+const angleStep = (2 * Math.PI) / count;
+const startAngle = -Math.PI / 2;
+const svg = document.getElementById('wheelSvg');
+
+function polar(r, a) { return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; }
+
+function slicePath(i) {
+  const gap = 0.022;
+  const a1 = startAngle + i * angleStep + gap;
+  const a2 = startAngle + (i + 1) * angleStep - gap;
+  const [ox1, oy1] = polar(outerR, a1);
+  const [ox2, oy2] = polar(outerR, a2);
+  const [ix1, iy1] = polar(innerR, a1);
+  const [ix2, iy2] = polar(innerR, a2);
+  return `M ${ix1} ${iy1} L ${ox1} ${oy1} A ${outerR} ${outerR} 0 0 1 ${ox2} ${oy2} L ${ix2} ${iy2} A ${innerR} ${innerR} 0 0 0 ${ix1} ${iy1} Z`;
+}
+
+weapons.forEach((w, i) => {
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', slicePath(i));
+  path.setAttribute('fill', w.color);
+  path.setAttribute('class', 'slice-path');
+  path.setAttribute('data-id', i);
+
+  const midA = startAngle + (i + 0.5) * angleStep;
+  const labelR = (outerR + innerR) / 2;
+  const [lx, ly] = polar(labelR, midA);
+
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  icon.setAttribute('x', lx); icon.setAttribute('y', ly - 11);
+  icon.setAttribute('text-anchor', 'middle');
+  icon.setAttribute('dominant-baseline', 'middle');
+  icon.setAttribute('fill', 'rgba(255,255,255,0.95)');
+  icon.setAttribute('font-size', '17');
+  icon.setAttribute('font-family', 'system-ui, sans-serif');
+  icon.textContent = w.icon;
+
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', lx); label.setAttribute('y', ly + 10);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('dominant-baseline', 'middle');
+  label.setAttribute('fill', 'rgba(255,255,255,0.82)');
+  label.setAttribute('font-size', '7.5');
+  label.setAttribute('font-weight', '500');
+  label.setAttribute('letter-spacing', '0.06em');
+  label.setAttribute('font-family', 'system-ui, sans-serif');
+  label.textContent = w.name.toUpperCase();
+
+  g.appendChild(path); g.appendChild(icon); g.appendChild(label);
+  svg.appendChild(g);
+  path.addEventListener('click', () => selectWeapon(i));
+});
+
+const ringGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+for (let i = 0; i < count; i++) {
+  const angle = startAngle + i * angleStep;
+  const [ix, iy] = polar(innerR, angle);
+  const [ox, oy] = polar(outerR, angle);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', ix); line.setAttribute('y1', iy);
+  line.setAttribute('x2', ox); line.setAttribute('y2', oy);
+  line.setAttribute('stroke', '#ffffff');
+  line.setAttribute('stroke-width', '1.5');
+  ringGroup.appendChild(line);
+}
+svg.appendChild(ringGroup);
+
+function clearAll() {
+  svg.querySelectorAll('.slice-path').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.utility-card, .mass-card').forEach(c => c.classList.remove('active'));
+}
+
+function updateInfo(name, type, icon, badgeBg, badgeColor, inputs, desc, stats) {
+  document.getElementById('infoBadge').textContent = type;
+  document.getElementById('infoBadge').style.background = badgeBg;
+  document.getElementById('infoBadge').style.color = badgeColor;
+  document.getElementById('infoTitle').textContent = name;
+  document.getElementById('infoDesc').textContent = desc;
+  document.getElementById('centerIcon').textContent = icon;
+  document.getElementById('centerName').textContent = name;
+  document.getElementById('centerSub').textContent = type;
+  const chip = document.getElementById('inputChip');
+  chip.innerHTML = '';
+  inputs.forEach(inp => {
+    const s = document.createElement('span');
+    s.className = 'btn-chip';
+    s.textContent = inp;
+    chip.appendChild(s);
+  });
+  const statsEl = document.getElementById('infoStats');
+  statsEl.innerHTML = '';
+  stats.forEach(s => {
+    const pill = document.createElement('span');
+    pill.className = 'stat-pill';
+    pill.textContent = s;
+    statsEl.appendChild(pill);
+  });
+}
+
+function selectWeapon(id) {
+  clearAll();
+  svg.querySelectorAll('.slice-path').forEach(p => {
+    if (parseInt(p.getAttribute('data-id')) === id) p.classList.add('active');
+  });
+  const w = weapons[id];
+  updateInfo(w.name, w.type, w.icon, w.badgeBg, w.badgeColor, w.inputs, w.desc, w.stats);
+}
+
+function selectUtility(key) {
+  clearAll();
+  document.getElementById('util-' + key).classList.add('active');
+  const u = utility[key];
+  updateInfo(u.name, u.type, u.icon, u.badgeBg, u.badgeColor, u.inputs, u.desc, u.stats);
+}
+
+function selectMass(key) {
+  clearAll();
+  document.getElementById('mass-' + key).classList.add('active');
+  const m = mass[key];
+  updateInfo(m.name, m.type, m.icon, m.badgeBg, m.badgeColor, m.inputs, m.desc, m.stats);
+}
+
+selectWeapon(0);
+</script>
+</body>
+</html>
